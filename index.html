@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+<meta name="theme-color" content="#4A90E2">
+<meta name="description" content="Aura Weather — a fully offline-capable weather PWA">
+<title>Aura Weather</title>
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icons/icon-192.png">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div id="pullIndicator" class="pull-indicator" aria-hidden="true">↻ Release to refresh</div>
+<div id="statusToast" class="toast" role="status" aria-live="polite"></div>
+
+<header class="topbar">
+  <div class="search-wrap">
+    <input id="searchInput" type="text" placeholder="Search city or place…" autocomplete="off" aria-label="Search location">
+    <div id="searchResults" class="search-results"></div>
+  </div>
+  <div class="topbar-actions">
+    <span id="offlineBadge" class="badge badge-offline" style="display:none;">Offline Mode</span>
+    <button id="gpsBtn" class="icon-btn" title="Use current location" aria-label="Use GPS location">📍</button>
+    <button id="historyBtn" class="icon-btn" title="Weather history" aria-label="Weather history">📊</button>
+    <button id="settingsBtn" class="icon-btn" title="Settings" aria-label="Settings">⚙️</button>
+    <button id="installBtn" class="icon-btn install-btn" style="display:none;" title="Install app">⬇ Install</button>
+  </div>
+</header>
+
+<div id="favoritesRow" class="favorites-row"></div>
+
+<main class="app-main">
+
+  <section class="dashboard-card glass">
+    <div class="dashboard-top">
+      <div>
+        <div id="locationName" class="location-name">Loading…</div>
+        <div class="current-temp-row">
+          <span id="currentTemp" class="current-temp">--°</span>
+          <div id="currentIcon" class="current-icon"></div>
+        </div>
+        <div id="currentCondition" class="current-condition">--</div>
+      </div>
+    </div>
+
+    <div class="metrics-grid">
+      <div class="metric"><span class="metric-label">Feels like</span><span id="feelsLike" class="metric-value">--°</span></div>
+      <div class="metric"><span class="metric-label">Humidity</span><span id="humidity" class="metric-value">--%</span></div>
+      <div class="metric"><span class="metric-label">Wind</span><span id="windSpeed" class="metric-value">--</span></div>
+      <div class="metric"><span class="metric-label">Direction</span><span id="windDir" class="metric-value">--</span></div>
+      <div class="metric"><span class="metric-label">Pressure</span><span id="pressure" class="metric-value">--</span></div>
+      <div class="metric"><span class="metric-label">UV Index</span><span id="uvIndex" class="metric-value">--</span></div>
+      <div class="metric"><span class="metric-label">Visibility</span><span id="visibility" class="metric-value">--</span></div>
+      <div class="metric"><span class="metric-label">Air Quality</span><span id="aqiValue" class="metric-value">--</span></div>
+      <div class="metric"><span class="metric-label">Moon phase</span><span id="moonPhase" class="metric-value">--</span></div>
+    </div>
+
+    <div class="sun-arc-wrap">
+      <svg id="sunArc" viewBox="0 0 200 100" class="sun-arc">
+        <path d="M10,100 A90,90 0 0,1 190,100" fill="none" stroke="currentColor" stroke-opacity="0.25" stroke-width="2" stroke-dasharray="4 4"/>
+        <circle class="sun-marker" cx="10" cy="100" r="6" fill="#FFC069"/>
+      </svg>
+      <div class="sun-times">
+        <span>🌅 <span id="sunrise">--:--</span></span>
+        <span>🌇 <span id="sunset">--:--</span></span>
+      </div>
+    </div>
+
+    <div class="dashboard-footer">
+      <span>Last updated: <strong id="lastUpdated">--:--</strong></span>
+      <div class="dashboard-footer-actions">
+        <button id="addFavoriteBtn" class="pill-btn">☆ Add favorite</button>
+        <button id="refreshBtn" class="pill-btn">↻ Refresh</button>
+        <button id="manualJsonBtn" class="pill-btn pill-btn-ghost">Paste JSON</button>
+      </div>
+    </div>
+  </section>
+
+  <div id="alertsBox" class="alerts-box"></div>
+
+  <section class="section">
+    <h2 class="section-title">Hourly forecast</h2>
+    <div id="hourlyTrack" class="hourly-track"></div>
+  </section>
+
+  <section class="section">
+    <h2 class="section-title">7-day forecast</h2>
+    <div id="dailyList" class="daily-list"></div>
+  </section>
+
+  <section class="section">
+    <h2 class="section-title">Weather statistics</h2>
+    <div class="charts-grid">
+      <div class="chart-card glass">
+        <h3>Temperature trend</h3>
+        <canvas id="chartTemp"></canvas>
+      </div>
+      <div class="chart-card glass">
+        <h3>Humidity trend</h3>
+        <canvas id="chartHumidity"></canvas>
+      </div>
+      <div class="chart-card glass">
+        <h3>Wind trend</h3>
+        <canvas id="chartWind"></canvas>
+      </div>
+      <div class="chart-card glass">
+        <h3>Rain probability</h3>
+        <canvas id="chartRain"></canvas>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<!-- Settings Modal -->
+<div id="settingsModal" class="modal-backdrop">
+  <div class="modal glass">
+    <div class="modal-header"><h2>Settings</h2><button id="settingsCloseBtn" class="icon-btn">✕</button></div>
+    <div class="modal-body">
+      <label class="field"><span>Units</span>
+        <select id="settingUnits"><option value="metric">Celsius (°C)</option><option value="imperial">Fahrenheit (°F)</option></select>
+      </label>
+      <label class="field"><span>Clock format</span>
+        <select id="settingClock"><option value="24">24-hour</option><option value="12">12-hour</option></select>
+      </label>
+      <label class="field"><span>Theme</span>
+        <select id="settingTheme"><option value="auto">Automatic</option><option value="light">Light</option><option value="dark">Dark</option></select>
+      </label>
+      <label class="field"><span>Auto-refresh interval</span>
+        <select id="settingRefresh">
+          <option value="15">15 minutes</option>
+          <option value="30">30 minutes</option>
+          <option value="60">60 minutes</option>
+        </select>
+      </label>
+      <fieldset class="field-group">
+        <legend>Notifications</legend>
+        <label class="checkbox-field"><input type="checkbox" id="settingNotifRain"> Heavy rain</label>
+        <label class="checkbox-field"><input type="checkbox" id="settingNotifStorm"> Storm</label>
+        <label class="checkbox-field"><input type="checkbox" id="settingNotifHeat"> Extreme heat</label>
+        <label class="checkbox-field"><input type="checkbox" id="settingNotifWind"> Strong wind</label>
+        <button id="enableNotifBtn" class="pill-btn pill-btn-ghost">Enable browser notifications</button>
+      </fieldset>
+    </div>
+    <div class="modal-footer">
+      <button id="settingsSaveBtn" class="pill-btn pill-btn-primary">Save settings</button>
+    </div>
+  </div>
+</div>
+
+<!-- History Modal -->
+<div id="historyModal" class="modal-backdrop">
+  <div class="modal glass">
+    <div class="modal-header"><h2>Weather history</h2><button id="historyCloseBtn" class="icon-btn">✕</button></div>
+    <div class="modal-body">
+      <div class="history-range-row">
+        <button class="history-range-btn" data-range="yesterday">Yesterday</button>
+        <button class="history-range-btn active" data-range="7">Last 7 days</button>
+        <button class="history-range-btn" data-range="30">Last 30 days</button>
+      </div>
+      <div id="historyList" class="history-list"></div>
+      <div class="history-actions">
+        <button id="exportHistoryBtn" class="pill-btn">Export CSV</button>
+        <label class="pill-btn pill-btn-ghost file-label">
+          Import CSV
+          <input id="importHistoryInput" type="file" accept=".csv" style="display:none;">
+        </label>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Manual JSON paste fallback -->
+<div id="manualJsonModal" class="modal-backdrop">
+  <div class="modal glass">
+    <div class="modal-header"><h2>Paste weather JSON</h2><button id="manualJsonCloseBtn" class="icon-btn">✕</button></div>
+    <div class="modal-body">
+      <p class="modal-hint">If automatic fetching is blocked on your network, paste an exported weather JSON payload here (Open-Meteo format supported) to load it manually.</p>
+      <textarea id="manualJsonInput" class="json-textarea" rows="8" placeholder='{"current": {...}, "hourly": {...}, "daily": {...}}'></textarea>
+    </div>
+    <div class="modal-footer">
+      <button id="manualJsonSubmitBtn" class="pill-btn pill-btn-primary">Load data</button>
+    </div>
+  </div>
+</div>
+
+<script src="storage.js"></script>
+<script src="scraper.js"></script>
+<script src="ui.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
