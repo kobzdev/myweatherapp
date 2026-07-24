@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
-<meta name="theme-color" content="#4A90E2">
+<meta name="theme-color" content="#1E8E5A">
 <meta name="description" content="Aura Weather — a fully offline-capable weather PWA">
 <title>Aura Weather</title>
 <link rel="manifest" href="manifest.json">
@@ -50,13 +50,12 @@
 
     <div class="metrics-grid">
       <div class="metric"><span class="metric-label">Feels like</span><span id="feelsLike" class="metric-value">--°</span></div>
-      <div class="metric"><span class="metric-label">Humidity</span><span id="humidity" class="metric-value">--%</span></div>
-      <div class="metric"><span class="metric-label">Wind</span><span id="windSpeed" class="metric-value">--</span></div>
-      <div class="metric"><span class="metric-label">Direction</span><span id="windDir" class="metric-value">--</span></div>
+      <div class="metric"><span class="metric-label">Humidity</span><span id="humidity" class="metric-value">--%</span><span id="humidityHint" class="metric-hint"></span></div>
+      <div class="metric"><span class="metric-label">Wind</span><span id="windSpeed" class="metric-value">--</span><span id="windDir" class="metric-hint"></span></div>
       <div class="metric"><span class="metric-label">Pressure</span><span id="pressure" class="metric-value">--</span></div>
-      <div class="metric"><span class="metric-label">UV Index</span><span id="uvIndex" class="metric-value">--</span></div>
+      <div class="metric"><span class="metric-label">UV Index</span><span id="uvIndex" class="metric-value">--</span><span id="uvHint" class="metric-hint"></span></div>
       <div class="metric"><span class="metric-label">Visibility</span><span id="visibility" class="metric-value">--</span></div>
-      <div class="metric"><span class="metric-label">Air Quality</span><span id="aqiValue" class="metric-value">--</span></div>
+      <div class="metric"><span class="metric-label">Air Quality</span><span id="aqiValue" class="metric-value">--</span><span id="aqiHint" class="metric-hint"></span></div>
       <div class="metric"><span class="metric-label">Moon phase</span><span id="moonPhase" class="metric-value">--</span></div>
     </div>
 

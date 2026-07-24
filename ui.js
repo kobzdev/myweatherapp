@@ -71,21 +71,46 @@ const UI = (() => {
 
   /* ---------------- Gradient backgrounds driven by condition + time ---------------- */
   const GRADIENTS = {
-    'clear-day': ['#4A90E2', '#87CEEB'],
-    'clear-night': ['#0B1026', '#1D2951'],
-    'partly-cloudy-day': ['#5B86C9', '#93B8DB'],
-    'partly-cloudy-night': ['#161B33', '#2C3454'],
-    'cloudy': ['#6B7789', '#96A1B3'],
-    'fog': ['#8B96A5', '#B7C0CC'],
-    'drizzle': ['#5C7099', '#83A0BC'],
-    'rain': ['#3E5372', '#5C7699'],
-    'snow': ['#8FA3C4', '#D8E4F2'],
-    'thunderstorm': ['#2B2F45', '#4A4E6D'],
+    'clear-day': ['#1E8E5A', '#6FCF97'],
+    'clear-night': ['#0B1F17', '#123B2A'],
+    'partly-cloudy-day': ['#2E9E68', '#7FCB9E'],
+    'partly-cloudy-night': ['#0F241B', '#1E3B2C'],
+    'cloudy': ['#4B6358', '#7C9A8B'],
+    'fog': ['#5E7268', '#9CB1A3'],
+    'drizzle': ['#33705A', '#5E9982'],
+    'rain': ['#245240', '#3C7B60'],
+    'snow': ['#5A9C82', '#D3ECD9'],
+    'thunderstorm': ['#122019', '#233F30'],
   };
   function applyBackground(iconName) {
     const [c1, c2] = GRADIENTS[iconName] || GRADIENTS['partly-cloudy-day'];
     document.documentElement.style.setProperty('--bg-gradient-1', c1);
     document.documentElement.style.setProperty('--bg-gradient-2', c2);
+  }
+
+  /* ---------------- Plain-language hints (makes raw numbers easier to read) ---------------- */
+  function humidityHint(h) {
+    if (h == null) return '';
+    if (h < 30) return 'Dry';
+    if (h < 60) return 'Comfortable';
+    if (h < 80) return 'Humid';
+    return 'Very humid';
+  }
+  function uvHint(uv) {
+    if (uv == null) return '';
+    if (uv < 3) return 'Low';
+    if (uv < 6) return 'Moderate';
+    if (uv < 8) return 'High';
+    if (uv < 11) return 'Very high';
+    return 'Extreme';
+  }
+  function aqiHint(aqi) {
+    if (aqi <= 50) return 'Good';
+    if (aqi <= 100) return 'Moderate';
+    if (aqi <= 150) return 'Unhealthy (sensitive)';
+    if (aqi <= 200) return 'Unhealthy';
+    if (aqi <= 300) return 'Very unhealthy';
+    return 'Hazardous';
   }
 
   /* ---------------- Dashboard render ---------------- */
@@ -97,14 +122,17 @@ const UI = (() => {
     $('#locationName').textContent = data.location.name;
     $('#feelsLike').textContent = fmtTemp(c.feelsLike, settings.units);
     $('#humidity').textContent = `${Math.round(c.humidity ?? 0)}%`;
+    $('#humidityHint').textContent = humidityHint(c.humidity);
     $('#windSpeed').textContent = fmtSpeed(c.windSpeed, settings.units);
     $('#windDir').textContent = c.windDir || '--';
     $('#pressure').textContent = `${Math.round(c.pressure ?? 0)} hPa`;
     $('#uvIndex').textContent = Math.round(c.uvIndex ?? 0);
+    $('#uvHint').textContent = uvHint(c.uvIndex);
     $('#visibility').textContent = `${(c.visibility ?? 0).toFixed(1)} km`;
     $('#sunrise').textContent = fmtTime(c.sunrise, settings.clock);
     $('#sunset').textContent = fmtTime(c.sunset, settings.clock);
     $('#aqiValue').textContent = c.aqi != null ? Math.round(c.aqi) : '--';
+    $('#aqiHint').textContent = c.aqi != null ? aqiHint(c.aqi) : '';
     $('#aqiValue').parentElement.style.display = c.aqi != null ? '' : 'none';
     $('#moonPhase').textContent = c.moonPhase ? c.moonPhase.name : '--';
 

@@ -7,8 +7,8 @@
   "display": "standalone",
   "display_override": ["window-controls-overlay", "standalone"],
   "orientation": "portrait-primary",
-  "background_color": "#4A90E2",
-  "theme_color": "#4A90E2",
+  "background_color": "#1E8E5A",
+  "theme_color": "#1E8E5A",
   "categories": ["weather", "utilities"],
   "icons": [
     { "src": "icons/icon-72.png", "sizes": "72x72", "type": "image/png", "purpose": "any" },
